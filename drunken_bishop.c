@@ -226,14 +226,14 @@ int main(int argc, char* argv[]) {
 	}
 
 	if(opt_version) {
-		fputs("drunken_bishop v" VERSION " by EiEddie\n",
+		fputs("bishop v" VERSION " by EiEddie\n",
 		      stdout);
 		return 0;
 	}
 	if(opt_help) {
 		fputs(
 		    "The hash fingerprint visualization algorithm, like OpenSSH.\n"
-		    "Usage: drunken_bishop [OPTION] [hex]\n"
+		    "Usage: bishop [OPTION] [hex]\n"
 		    "\n"
 		    "  -h, --help     print help info\n"
 		    "      --version  print version info\n"
