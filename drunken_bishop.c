@@ -24,10 +24,6 @@ typedef struct {
 	int* filed;
 } Filed;
 
-static void filed_add(int pos, Filed* filed) {
-	filed->filed[pos] += 1;
-}
-
 static void filed_print(const Filed* filed) {
 	putc('+', stdout);
 	for(int i = 0; i < filed->w; i++)
@@ -107,7 +103,7 @@ static void bishop_move(const char* const hex,
 		for(int i = 0; i < 4; i++) {
 			move(pnt, bits & 0b11);
 			bits >>= 2;
-			filed_add(get_pos(*pnt), filed);
+			filed->filed[get_pos(*pnt)] += 1;
 		}
 	}
 
