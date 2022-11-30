@@ -79,3 +79,39 @@ static void move(Point* pnt, int dir) {
 	pnt->y += (dir & 0b10) - 1;
 	pnt->y = limit(pnt->y, 0, F_HEIGHT);
 }
+
+
+static int atoi(const char* const str, int base) {
+	int digit = 0;
+	for(const char* i = str; *i; i++)
+		digit = digit * base + *i
+		    - (*i >= 'a' ? 'a' - 10 : '0');
+	return digit;
+}
+
+
+static void bishop_move(const char* const hex,
+                        Point* const pnt,
+                        Filed* const filed) {
+	Point start_pnt = *pnt;
+	const char* c = hex;
+	char block[3];
+	block[2] = '\0';
+
+	while(*c) {
+		block[0] = *c++;
+		block[1] = *c++;
+
+		int bits = atoi(block, 16);
+
+		for(int i = 0; i < 4; i++) {
+			move(pnt, bits & 0b11);
+			bits >>= 2;
+			filed_add(get_pos(*pnt), filed);
+		}
+	}
+
+	Point end_pnt = *pnt;
+	filed->filed[get_pos(start_pnt)] = 15;
+	filed->filed[get_pos(end_pnt)] = 16;
+}
