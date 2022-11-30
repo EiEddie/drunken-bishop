@@ -8,8 +8,8 @@
 # Local build folder
 [Bb]uild/
 
-# Release folder
-dist/
+# Binary folder
+bin/
 
 # Test binary file
 test/[Bb]in/
