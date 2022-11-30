@@ -28,11 +28,34 @@ static void filed_add(int pos, Filed* filed) {
 	filed->filed[pos] += 1;
 }
 
+static void filed_print(const Filed* filed) {
+	putc('+', stdout);
+	for(int i = 0; i < filed->w; i++)
+		putc('-', stdout);
+	fputs("+\n", stdout);
+
+	for(int y = 0; y < filed->h; y++) {
+		putc('|', stdout);
+		for(int x = 0; x < filed->w; x++) {
+			Point pnt = {x, y};
+			putc(" .o+=*BOX@%&#/^SE"[filed->filed[get_pos(
+			         pnt)]],
+			     stdout);
+		}
+		fputs("|\n", stdout);
+	}
+
+	putc('+', stdout);
+	for(int i = 0; i < filed->w; i++)
+		putc('-', stdout);
+	fputs("+\n", stdout);
+}
+
 static void filed_init(Filed* filed) {
 	filed->w = F_WIDTH;
 	filed->h = F_HEIGHT;
-	filed->filed = (int*)calloc(filed->w * filed->h,
-	                            sizeof(int));
+	filed->filed =
+	    (int*)calloc(filed->w * filed->h, sizeof(int));
 }
 
 static void filed_free(Filed* filed) {
