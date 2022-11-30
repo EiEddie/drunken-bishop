@@ -237,7 +237,7 @@ int main(int argc, char* argv[]) {
 		    "\n"
 		    "  -h, --help     print help info\n"
 		    "      --version  print version info\n"
-		    "  -q, --q        don't echo hex input\n"
+		    "  -q, --quiet    don't echo hex input\n"
 		    "      --story    read the story of Bishop Peter\n",
 		    stdout);
 		return 0;
