@@ -1,6 +1,10 @@
 #include <memory.h>
 #include <malloc.h>
 
+#define max(x, y)          ((x) > (y) ? (x) : (y))
+#define min(x, y)          ((x) < (y) ? (x) : (y))
+#define limit(n, from, to) max(min(n, to - 1), from)
+
 #define F_WIDTH  17
 #define F_HEIGHT 9
 
@@ -37,4 +41,21 @@ static void filed_init(Filed* filed) {
 static void filed_free(Filed* filed) {
 	free(filed->filed);
 	filed->filed = NULL;
+}
+
+
+/**
+ * \param dir direction
+ *
+ * 0b00 UP_LEFT    \n
+ * 0b01 UP_RIGHT   \n
+ * 0b10 DOWN_LEFT  \n
+ * 0b11 DOWN_RIGHT \n
+ */
+static void move(Point* pnt, int dir) {
+	pnt->x += ((dir & 0b01) << 1) - 1;
+	pnt->x = limit(pnt->x, 0, F_WIDTH);
+
+	pnt->y += ((dir & 0b10) << 1) - 1;
+	pnt->y = limit(pnt->y, 0, F_HEIGHT);
 }
