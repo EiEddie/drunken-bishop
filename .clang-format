@@ -81,7 +81,7 @@ BreakAfterJavaFieldAnnotations: false
 
 BreakStringLiterals: false
 
-ColumnLimit: 80
+ColumnLimit: 60
 
 CommentPragmas: '^ IWYU pragma:'
 
