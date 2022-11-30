@@ -1,8 +1,9 @@
 CC = gcc
 C_FLAGS = -Wall
 
-target = drunken_bishop
+target = bishop
 c_srcs = drunken_bishop.c
+objs = $(subst .c,.o,$(c_srcs))
 
 ifdef DEBUG
 	C_FLAGS += -g
@@ -14,19 +15,18 @@ endif
 .PHONY: all clean mkdir
 
 
-all: $(target)
+all: mkdir $(target)
 
 
 mkdir:
 	-mkdir bin
 
 
-.c.o: mkdir
+$(objs): %.o: %.c
 	$(CC) $(C_FLAGS) -c $< -o bin/$@
 
 
-objs = $(target).o
-$(target): mkdir $(objs)
+$(target): $(objs)
 	$(CC) -o bin/$@ $(patsubst %,bin/%,$(objs))
 
 
