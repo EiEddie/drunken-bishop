@@ -76,6 +76,6 @@ static void move(Point* pnt, int dir) {
 	pnt->x += ((dir & 0b01) << 1) - 1;
 	pnt->x = limit(pnt->x, 0, F_WIDTH);
 
-	pnt->y += ((dir & 0b10) << 1) - 1;
+	pnt->y += (dir & 0b10) - 1;
 	pnt->y = limit(pnt->y, 0, F_HEIGHT);
 }
