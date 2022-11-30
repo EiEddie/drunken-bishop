@@ -1,4 +1,4 @@
-C ?= gcc
+CC = gcc
 C_FLAGS = -Wall
 
 target = drunken_bishop
@@ -22,12 +22,12 @@ mkdir:
 
 
 .c.o: mkdir
-	$(C) $(C_FLAGS) -c $< -o bin/$@
+	$(CC) $(C_FLAGS) -c $< -o bin/$@
 
 
 objs = $(target).o
 $(target): mkdir $(objs)
-	$(C) -o bin/$@ $(patsubst %,bin/%,$(objs))
+	$(CC) -o bin/$@ $(patsubst %,bin/%,$(objs))
 
 
 clean:
