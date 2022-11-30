@@ -33,9 +33,6 @@ static void filed_init(Filed* filed) {
 	filed->h = F_HEIGHT;
 	filed->filed = (int*)calloc(filed->w * filed->h,
 	                            sizeof(int));
-
-	Point begin_pnt = {filed->w / 2, filed->h / 2};
-	filed_add(get_pos(begin_pnt), filed);
 }
 
 static void filed_free(Filed* filed) {
