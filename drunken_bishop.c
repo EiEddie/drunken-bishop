@@ -1,5 +1,6 @@
 #include <memory.h>
 #include <malloc.h>
+#include <stdlib.h>
 
 #define max(x, y)          ((x) > (y) ? (x) : (y))
 #define min(x, y)          ((x) < (y) ? (x) : (y))
@@ -77,7 +78,7 @@ static void move(Point* pnt, int dir) {
 }
 
 
-static int atoi(const char* const str, int base) {
+static int __atoi(const char* const str, int base) {
 	int digit = 0;
 	for(const char* i = str; *i; i++)
 		digit = digit * base + *i
@@ -96,9 +97,15 @@ static void bishop_move(const char* const hex,
 
 	while(*c) {
 		block[0] = *c++;
+		if(!*c) {
+			fputs(
+			    "length of given hex-string is not even.\n",
+			    stdout);
+			exit(1);
+		}
 		block[1] = *c++;
 
-		int bits = atoi(block, 16);
+		int bits = __atoi(block, 16);
 
 		for(int i = 0; i < 4; i++) {
 			move(pnt, bits & 0b11);
@@ -110,4 +117,30 @@ static void bishop_move(const char* const hex,
 	Point end_pnt = *pnt;
 	filed->filed[get_pos(start_pnt)] = 15;
 	filed->filed[get_pos(end_pnt)] = 16;
+}
+
+
+static void print_fingerprint(const char* const hex_str) {
+	Filed filed;
+	filed_init(&filed);
+
+	Point bishop_pnt = {8, 4};
+	bishop_move(hex_str, &bishop_pnt, &filed);
+
+	printf("fingerprint of %s:\n", hex_str);
+	filed_print(&filed);
+
+	filed_free(&filed);
+}
+
+
+int main(int argc, char* argv[]) {
+	const char* hex_str =
+	    "fc94b0c1e5b0987c5843997697ee9fb7";
+	if(argc > 1)
+		hex_str = argv[1];
+
+	print_fingerprint(hex_str);
+
+	return 0;
 }
