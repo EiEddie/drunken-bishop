@@ -87,9 +87,9 @@ static int __atoi(const char* const str, int base) {
 }
 
 
-static void bishop_move(const char* const hex,
-                        Point* const pnt,
-                        Filed* const filed) {
+static int bishop_move(const char* const hex,
+                       Point* const pnt,
+                       Filed* const filed) {
 	Point start_pnt = *pnt;
 	const char* c = hex;
 	char block[3];
@@ -100,8 +100,8 @@ static void bishop_move(const char* const hex,
 		if(!*c) {
 			fputs(
 			    "length of given hex-string is not even.\n",
-			    stdout);
-			exit(1);
+			    stderr);
+			return -1;
 		}
 		block[1] = *c++;
 
@@ -117,20 +117,26 @@ static void bishop_move(const char* const hex,
 	Point end_pnt = *pnt;
 	filed->filed[get_pos(start_pnt)] = 15;
 	filed->filed[get_pos(end_pnt)] = 16;
+
+	return 0;
 }
 
 
-static void print_fingerprint(const char* const hex_str) {
+static int print_fingerprint(const char* const hex_str) {
+	int err = 0;
+
 	Filed filed;
 	filed_init(&filed);
 
 	Point bishop_pnt = {8, 4};
-	bishop_move(hex_str, &bishop_pnt, &filed);
-
+	if((err = bishop_move(hex_str, &bishop_pnt, &filed)))
+		goto ERROR;
 	printf("fingerprint of %s:\n", hex_str);
 	filed_print(&filed);
 
+ERROR:
 	filed_free(&filed);
+	return err;
 }
 
 
@@ -140,7 +146,5 @@ int main(int argc, char* argv[]) {
 	if(argc > 1)
 		hex_str = argv[1];
 
-	print_fingerprint(hex_str);
-
-	return 0;
+	return print_fingerprint(hex_str);
 }
