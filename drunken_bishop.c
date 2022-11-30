@@ -9,6 +9,24 @@
 #define F_WIDTH  17
 #define F_HEIGHT 9
 
+#define VERSION "1.0.0"
+#define STORY                                               \
+	"Bishop Peter finds himself in the middle of an\n"      \
+	"ambient atrium. There are walls on all four sides\n"   \
+	"and apparently there is no exit. The floor is paved\n" \
+	"with square tiles, strictly alternating between\n"     \
+	"black and white. His head heavily aching—probably\n" \
+	"from too much wine he had before—he starts\n"        \
+	"wandering around randomly. Well, to be exact, he\n"    \
+	"only makes diagonal steps—just like a bishop on a\n" \
+	"chess board. When he hits a wall, he moves to the\n"   \
+	"side, which takes him from the black tiles to the\n"   \
+	"white tiles (or vice versa). And after each move,\n"   \
+	"he places a coin on the floor, to remember that he\n"  \
+	"has been there before. After 64 steps, just when no\n" \
+	"coins are left, Peter suddenly wakes up. What a\n"     \
+	"strange dream!\n"
+
 
 typedef struct {
 	int x, y;
@@ -131,7 +149,6 @@ static int print_fingerprint(const char* const hex_str) {
 	Point bishop_pnt = {8, 4};
 	if((err = bishop_move(hex_str, &bishop_pnt, &filed)))
 		goto ERROR;
-	printf("fingerprint of %s:\n", hex_str);
 	filed_print(&filed);
 
 ERROR:
@@ -143,8 +160,95 @@ ERROR:
 int main(int argc, char* argv[]) {
 	const char* hex_str =
 	    "fc94b0c1e5b0987c5843997697ee9fb7";
-	if(argc > 1)
-		hex_str = argv[1];
+
+	int opt_help = 0;
+	int opt_version = 0;
+	int opt_hex = 0;
+	int opt_is_value = 0;
+	int opt_quiet = 0;
+	int opt_story = 0;
+
+	for(int i = 1; i < argc; i++) {
+		char* arg = argv[i];
+
+		if(*arg != '-') {
+			if(!opt_hex) { // 是hash字符串
+				hex_str = arg;
+				opt_hex = 1;
+			} else if(opt_is_value) { // 是上个参数的值
+				opt_is_value = 0;
+				continue;
+			} else {
+				fputs("unknown param: `", stderr);
+				fputs(arg, stderr);
+				fputs("'\n", stderr);
+				return 1;
+			}
+			continue;
+		}
+		arg++;
+
+		if(*arg == '-') { // 长选项
+			arg++;
+
+			if(strcmp(arg, "version") == 0) {
+				opt_version = 1;
+			} else if(strcmp(arg, "help") == 0) {
+				opt_help = 1;
+			} else if(strcmp(arg, "story") == 0) {
+				opt_story = 1;
+			} else if(strcmp(arg, "quiet") == 0) {
+				opt_quiet = 1;
+			} else {
+				fputs("unrecognized flag `--", stderr);
+				fputs(arg, stderr);
+				fputs("'\n", stderr);
+				return 1;
+			}
+			continue;
+		}
+
+		for(; *arg != '\0'; ++arg) { // 短选项
+			switch(*arg) {
+			case 'h':
+				opt_help = 1;
+				break;
+			case 'q':
+				opt_quiet = 1;
+				break;
+			default:
+				fputs("unrecognized flag `-", stderr);
+				fputs(arg, stderr);
+				fputs("'\n", stderr);
+				return 1;
+			}
+		}
+	}
+
+	if(opt_version) {
+		fputs("drunken_bishop v" VERSION " by EiEddie\n",
+		      stdout);
+		return 0;
+	}
+	if(opt_help) {
+		fputs(
+		    "The hash fingerprint visualization algorithm, like OpenSSH.\n"
+		    "Usage: drunken_bishop [OPTION] [hex]\n"
+		    "\n"
+		    "  -h, --help     print help info\n"
+		    "      --version  print version info\n"
+		    "  -q, --q        don't echo hex input\n"
+		    "      --story    read the story of Bishop Peter\n",
+		    stdout);
+		return 0;
+	}
+	if(opt_story) {
+		fputs(STORY, stdout);
+		return 0;
+	}
+
+	if(!opt_quiet)
+		printf("fingerprint of %s:\n", hex_str);
 
 	return print_fingerprint(hex_str);
 }
