@@ -271,8 +271,14 @@ int main(int argc, char* argv[]) {
 			char* offset = buffer;
 			while((*offset++ = fgetc(file)) != EOF)
 				/* nothing */;
-			*(offset - 1) = '\0';
-			// FIXME: 文件尾空行
+			*(--offset) = '\0';
+
+			while(offset != buffer) {
+				if(*(--offset) == '\n')
+					*offset = '\0';
+				else
+					break;
+			} // 删除文件尾部连续的空行
 
 			fclose(file);
 			hex_str = buffer;
