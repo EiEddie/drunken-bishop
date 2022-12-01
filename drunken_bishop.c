@@ -9,6 +9,8 @@
 #define F_WIDTH  17
 #define F_HEIGHT 9
 
+#define BUFSIZE 1024 * 1024 // 1MB
+
 #define VERSION "1.0.0"
 #define STORY                                               \
 	"Bishop Peter finds himself in the middle of an\n"      \
@@ -97,6 +99,7 @@ static void move(Point* pnt, int dir) {
 
 
 static int __atoi(const char* const str, int base) {
+	// TODO: 十六进制字符串大小写转换
 	int digit = 0;
 	for(const char* i = str; *i; i++)
 		digit = digit * base + *i
@@ -161,23 +164,25 @@ int main(int argc, char* argv[]) {
 	const char* hex_str =
 	    "fc94b0c1e5b0987c5843997697ee9fb7";
 
-	int opt_help = 0;
-	int opt_version = 0;
-	int opt_hex = 0;
-	int opt_is_value = 0;
-	int opt_quiet = 0;
-	int opt_story = 0;
+	int is_help = 0;    // 打印帮助信息
+	int is_version = 0; // 打印版本信息
+	int is_quiet = 0;   // quiet 模式
+	int is_story = 0;   // 打印 Peter 的故事
+	const char* file_path = NULL;
+
+	int opt_hex = 0;      // 是hash字符串
+	int opt_is_value = 0; // 是上个参数的值
 
 	for(int i = 1; i < argc; i++) {
 		char* arg = argv[i];
 
 		if(*arg != '-') {
-			if(!opt_hex) { // 是hash字符串
-				hex_str = arg;
-				opt_hex = 1;
-			} else if(opt_is_value) { // 是上个参数的值
+			if(opt_is_value) {
 				opt_is_value = 0;
 				continue;
+			} else if(!opt_hex) {
+				hex_str = arg;
+				opt_hex = 1;
 			} else {
 				fputs("unknown param: `", stderr);
 				fputs(arg, stderr);
@@ -192,13 +197,16 @@ int main(int argc, char* argv[]) {
 			arg++;
 
 			if(strcmp(arg, "version") == 0) {
-				opt_version = 1;
+				is_version = 1;
 			} else if(strcmp(arg, "help") == 0) {
-				opt_help = 1;
+				is_help = 1;
 			} else if(strcmp(arg, "story") == 0) {
-				opt_story = 1;
+				is_story = 1;
 			} else if(strcmp(arg, "quiet") == 0) {
-				opt_quiet = 1;
+				is_quiet = 1;
+			} else if(strcmp(arg, "in") == 0) {
+				opt_is_value = 1;
+				file_path = argv[i + 1];
 			} else {
 				fputs("unrecognized flag `--", stderr);
 				fputs(arg, stderr);
@@ -211,10 +219,14 @@ int main(int argc, char* argv[]) {
 		for(; *arg != '\0'; ++arg) { // 短选项
 			switch(*arg) {
 			case 'h':
-				opt_help = 1;
+				is_help = 1;
 				break;
 			case 'q':
-				opt_quiet = 1;
+				is_quiet = 1;
+				break;
+			case 'i':
+				opt_is_value = 1;
+				file_path = argv[i + 1];
 				break;
 			default:
 				fputs("unrecognized flag `-", stderr);
@@ -225,29 +237,53 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
-	if(opt_version) {
-		fputs("bishop v" VERSION " by EiEddie\n",
-		      stdout);
+	if(is_version) {
+		fputs("bishop v" VERSION " by EiEddie\n", stdout);
 		return 0;
 	}
-	if(opt_help) {
+	if(is_help) {
 		fputs(
 		    "The hash fingerprint visualization algorithm, like OpenSSH.\n"
 		    "Usage: bishop [OPTION] [hex]\n"
 		    "\n"
-		    "  -h, --help     print help info\n"
-		    "      --version  print version info\n"
-		    "  -q, --quiet    don't echo hex input\n"
-		    "      --story    read the story of Bishop Peter\n",
+		    "  -h, --help       print help info\n"
+		    "      --version    print version info\n"
+		    "  -q, --quiet      don't echo hex input\n"
+		    "  -i, --in <file>  use file, if '-' use stdin\n"
+		    "      --story      read the story of Bishop Peter\n",
 		    stdout);
 		return 0;
 	}
-	if(opt_story) {
+	if(is_story) {
 		fputs(STORY, stdout);
 		return 0;
 	}
 
-	if(!opt_quiet)
+	char buffer[BUFSIZE];
+	if(file_path != NULL) {
+		FILE* file = NULL;
+		if(strcmp(file_path, "-") == 0)
+			file = stdin;
+		else
+			file = fopen(file_path, "r");
+
+		if(file != NULL) {
+			char* offset = buffer;
+			while((*offset++ = fgetc(file)) != EOF)
+				/* nothing */;
+			*(offset - 1) = '\0';
+			// FIXME: 文件尾空行
+
+			fclose(file);
+			hex_str = buffer;
+		} else {
+			fputs(file_path, stderr);
+			fputs(": no such file\n", stderr);
+			return 1;
+		}
+	}
+
+	if(!is_quiet)
 		printf("fingerprint of %s:\n", hex_str);
 
 	return print_fingerprint(hex_str);
