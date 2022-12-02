@@ -23,10 +23,11 @@ fingerprint of fc94b0c1e5b0987c5843997697ee9fb7:
 ```
 Usage: bishop [OPTION] [hex]
 
-  -h, --help     print help info
-      --version  print version info
-  -q, --quiet    don't echo hex input
-      --story    read the story of Bishop Peter
+  -h, --help       print help info
+      --version    print version info
+  -q, --quiet      don't echo hex input
+  -i, --in <file>  use file, if '-' use stdin
+      --story      read the story of Bishop Peter
 ```
 
 ## 编译
