@@ -10,12 +10,7 @@
 
 # Binary folder
 bin/
-
-# Test binary file
-test/[Bb]in/
-
-# Test build folder
-test/[Bb]uild/
+tmp/
 
 # Prerequisites
 *.d
