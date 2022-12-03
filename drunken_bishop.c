@@ -160,6 +160,36 @@ ERROR:
 }
 
 
+static int read_file(const char* file_path, char* buffer) {
+	FILE* file = NULL;
+	if(strcmp(file_path, "-") == 0)
+		file = stdin;
+	else
+		file = fopen(file_path, "r");
+
+	if(file != NULL) {
+		char* offset = buffer;
+		while((*offset++ = fgetc(file)) != EOF)
+			/* nothing */;
+		*(--offset) = '\0';
+
+		while(offset != buffer) {
+			if(*(--offset) == '\n')
+				*offset = '\0';
+			else
+				break;
+		} // 删除文件尾部连续的空行
+
+		fclose(file);
+		return 0;
+	} else {
+		fputs(file_path, stderr);
+		fputs(": no such file\n", stderr);
+		return -1;
+	}
+}
+
+
 int main(int argc, char* argv[]) {
 	const char* hex_str =
 	    "fc94b0c1e5b0987c5843997697ee9fb7";
@@ -261,32 +291,10 @@ int main(int argc, char* argv[]) {
 
 	char buffer[BUFSIZE];
 	if(file_path != NULL) {
-		FILE* file = NULL;
-		if(strcmp(file_path, "-") == 0)
-			file = stdin;
-		else
-			file = fopen(file_path, "r");
-
-		if(file != NULL) {
-			char* offset = buffer;
-			while((*offset++ = fgetc(file)) != EOF)
-				/* nothing */;
-			*(--offset) = '\0';
-
-			while(offset != buffer) {
-				if(*(--offset) == '\n')
-					*offset = '\0';
-				else
-					break;
-			} // 删除文件尾部连续的空行
-
-			fclose(file);
+		if(!read_file(file_path, buffer))
 			hex_str = buffer;
-		} else {
-			fputs(file_path, stderr);
-			fputs(": no such file\n", stderr);
+		else
 			return 1;
-		}
 	}
 
 	if(!is_quiet)
