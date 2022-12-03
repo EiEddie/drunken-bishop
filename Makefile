@@ -23,6 +23,7 @@ $(objs): tmp/%.o: %.c
 
 clean:
 	-rm -rf tmp
+	-rm -rf bin
 
 mkdir:
 	-mkdir tmp
