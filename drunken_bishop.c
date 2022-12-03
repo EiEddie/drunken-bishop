@@ -98,10 +98,27 @@ static void move(Point* pnt, int dir) {
 }
 
 
-static int __atoi(const char* const str, int base) {
-	// TODO: 十六进制字符串大小写转换
+static void to_lower(char* dest, const char* src) {
+	char* i = dest;
+	const char* c = src;
+
+	while(*c) {
+		if(*c >= 'A' && *c <= 'Z')
+			*i = *c - 'A' + 'a';
+		else
+			*i = *c;
+		++i;
+		++c;
+	}
+}
+
+
+static int to_dec(const char* const str, int base) {
+	char buffer[BUFSIZE];
 	int digit = 0;
-	for(const char* i = str; *i; i++)
+	to_lower(buffer, str);
+
+	for(const char* i = buffer; *i; i++)
 		digit = digit * base + *i
 		    - (*i >= 'a' ? 'a' - 10 : '0');
 	return digit;
@@ -126,7 +143,7 @@ static int bishop_move(const char* const hex,
 		}
 		block[1] = *c++;
 
-		int bits = __atoi(block, 16);
+		int bits = to_dec(block, 16);
 
 		for(int i = 0; i < 4; i++) {
 			move(pnt, bits & 0b11);
