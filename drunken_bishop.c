@@ -220,7 +220,7 @@ int main(int argc, char* argv[]) {
 				return 1;
 			}
 			continue;
-		}
+		} //FIXME: 需要值的选项不传值时报错
 		arg++;
 
 		if(*arg == '-') { // 长选项
@@ -263,6 +263,19 @@ int main(int argc, char* argv[]) {
 				fputs(arg, stderr);
 				fputs("'\n", stderr);
 				return 1;
+			}
+
+			if(opt_is_value) {
+				// 需要值的短选项不是最后一个时
+				// 如 -iq -
+				if(*(arg + 1) != '\0') {
+					fputs("param `-", stderr);
+					fputc(*arg, stderr);
+					fputs("' need a value\n", stderr);
+					return 1;
+				} else {
+					break;
+				}
 			}
 		}
 	}
