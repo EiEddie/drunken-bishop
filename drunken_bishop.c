@@ -200,17 +200,13 @@ int main(int argc, char* argv[]) {
 	int is_story = 0;   // 打印 Peter 的故事
 	const char* file_path = NULL;
 
-	int opt_hex = 0;      // 是hash字符串
-	int opt_is_value = 0; // 是上个参数的值
+	int opt_hex = 0; // 是hash字符串
 
 	for(int i = 1; i < argc; i++) {
 		char* arg = argv[i];
 
 		if(*arg != '-') {
-			if(opt_is_value) {
-				opt_is_value = 0;
-				continue;
-			} else if(!opt_hex) {
+			if(!opt_hex) {
 				hex_str = arg;
 				opt_hex = 1;
 			} else {
@@ -220,10 +216,12 @@ int main(int argc, char* argv[]) {
 				return 1;
 			}
 			continue;
-		} //FIXME: 需要值的选项不传值时报错
+		}
 		arg++;
 
 		if(*arg == '-') { // 长选项
+			int opt_is_value = 0;
+
 			arg++;
 
 			if(strcmp(arg, "version") == 0) {
@@ -236,17 +234,31 @@ int main(int argc, char* argv[]) {
 				is_quiet = 1;
 			} else if(strcmp(arg, "in") == 0) {
 				opt_is_value = 1;
-				file_path = argv[i + 1];
+				file_path = argv[++i];
+				// 当 i == argc - 1 时 argv[++i] 不报错
+				// 奇怪的行为, 但符合预期
 			} else {
 				fputs("unrecognized flag `--", stderr);
 				fputs(arg, stderr);
 				fputs("'\n", stderr);
 				return 1;
 			}
+
+			if(opt_is_value && i == argc) {
+				// 需要值的选项是参数列表最后一个时
+				// e.g. -q --in
+				fputs("expected value after `", stderr);
+				fputs(argv[i - 1], stderr);
+				fputs("'\n", stderr);
+				return 1;
+			}
+
 			continue;
 		}
 
 		for(; *arg != '\0'; ++arg) { // 短选项
+			int opt_is_value = 0;
+
 			switch(*arg) {
 			case 'h':
 				is_help = 1;
@@ -256,7 +268,7 @@ int main(int argc, char* argv[]) {
 				break;
 			case 'i':
 				opt_is_value = 1;
-				file_path = argv[i + 1];
+				file_path = argv[++i];
 				break;
 			default:
 				fputs("unrecognized flag `-", stderr);
@@ -265,17 +277,16 @@ int main(int argc, char* argv[]) {
 				return 1;
 			}
 
-			if(opt_is_value) {
-				// 需要值的短选项不是最后一个时
-				// 如 -iq -
-				if(*(arg + 1) != '\0') {
-					fputs("param `-", stderr);
-					fputc(*arg, stderr);
-					fputs("' need a value\n", stderr);
-					return 1;
-				} else {
-					break;
-				}
+			if(opt_is_value
+			   && (*(arg + 1) != '\0' || i == argc)) {
+				// 需要值的短选项不是最后一个短选项时
+				// e.g. -iq -
+				// 或需要值的短选项是参数列表最后一个时
+				// e.g. -q -i
+				fputs("expected value after `-", stderr);
+				fputc(*arg, stderr);
+				fputs("'\n", stderr);
+				return 1;
 			}
 		}
 	}
