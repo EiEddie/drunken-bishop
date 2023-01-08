@@ -31,6 +31,41 @@
 	"strange dream!\n"
 
 
+static void to_lower(char* dest, const char* src) {
+	char* i = dest;
+	const char* c = src;
+
+	while(*c) {
+		if(*c >= 'A' && *c <= 'Z')
+			*i = *c - 'A' + 'a';
+		else
+			*i = *c;
+		++i;
+		++c;
+	}
+}
+
+
+enum InputType {
+	/** \brief 十六进制字符串 */
+	HEX,
+	/** \brief 字节流 */
+	BYTES
+};
+
+enum InputType get_input_type(const char* in) {
+	char buf[16] = {0};
+	to_lower(buf, in);
+
+	if(strcmp(buf, "hex") == 0)
+		return HEX;
+	else if(strcmp(buf, "bytes") == 0)
+		return BYTES;
+	else
+		return -1;
+}
+
+
 typedef struct {
 	int x, y;
 } Point;
@@ -96,21 +131,6 @@ static void move(Point* pnt, int dir) {
 
 	pnt->y += (dir & 0b10) - 1;
 	pnt->y = limit(pnt->y, 0, F_HEIGHT);
-}
-
-
-static void to_lower(char* dest, const char* src) {
-	char* i = dest;
-	const char* c = src;
-
-	while(*c) {
-		if(*c >= 'A' && *c <= 'Z')
-			*i = *c - 'A' + 'a';
-		else
-			*i = *c;
-		++i;
-		++c;
-	}
 }
 
 
@@ -219,10 +239,11 @@ int main(int argc, char* argv[]) {
 	const char* hex_str =
 	    "fc94b0c1e5b0987c5843997697ee9fb7";
 
-	int is_help = 0;    // 打印帮助信息
-	int is_version = 0; // 打印版本信息
-	int is_quiet = 0;   // quiet 模式
-	int is_story = 0;   // 打印 Peter 的故事
+	int is_help = 0;           // 打印帮助信息
+	int is_version = 0;        // 打印版本信息
+	int is_quiet = 0;          // quiet 模式
+	int is_story = 0;          // 打印 Peter 的故事
+	enum InputType type = HEX; // 输入的类型
 	const char* file_path = NULL;
 
 	int opt_hex = 0; // 是hash字符串
@@ -260,6 +281,9 @@ int main(int argc, char* argv[]) {
 			} else if(strcmp(arg, "in") == 0) {
 				opt_is_value = 1;
 				file_path = argv[++i];
+			} else if(strcmp(arg, "type") == 0) {
+				opt_is_value = 1;
+				type = get_input_type(argv[++i]);
 			} else {
 				fputs("unrecognized flag `--", stderr);
 				fputs(arg, stderr);
@@ -292,6 +316,10 @@ int main(int argc, char* argv[]) {
 			case 'i':
 				opt_is_value = 1;
 				file_path = argv[++i];
+				break;
+			case 't':
+				opt_is_value = 1;
+				type = get_input_type(argv[++i]);
 				break;
 			default:
 				fputs("unrecognized flag `-", stderr);
@@ -335,13 +363,20 @@ int main(int argc, char* argv[]) {
 		fputs(STORY, stdout);
 		return 0;
 	}
+	if(type == -1) {
+		fputs("unknown input type\n", stderr);
+		return 1;
+	}
 
 	char buffer[BUFSIZE];
 	if(file_path != NULL) {
-		if(!read_file(file_path, buffer))
+		if(!read_file(file_path, buffer)) {
+			if(type == HEX)
+				remove_end_whitespace(buffer);
 			hex_str = buffer;
-		else
+		} else {
 			return 1;
+		}
 	}
 
 	if(!is_quiet)
@@ -349,3 +384,5 @@ int main(int argc, char* argv[]) {
 
 	return print_fingerprint(hex_str);
 }
+// TODO: 处理输入的字节流
+// TODO: 修改文档: 版本, 帮助信息, README
