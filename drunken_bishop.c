@@ -6,6 +6,8 @@
 #define max(x, y)          ((x) > (y) ? (x) : (y))
 #define min(x, y)          ((x) < (y) ? (x) : (y))
 #define limit(n, from, to) max(min(n, to - 1), from)
+#define single_hex(dec) \
+	((dec) < 10 ? '0' + (dec) : 'a' + (dec)-10)
 
 #define F_WIDTH  17
 #define F_HEIGHT 9
@@ -134,7 +136,19 @@ static void move(Point* pnt, int dir) {
 }
 
 
-static int to_dec(const char* const str, int base) {
+static void bytes_to_hex(const char* const bytes,
+                         size_t size, char* hex) {
+	char* offset = hex;
+	for(int i = 0; i < size; i++) {
+		*(offset++) = single_hex(
+		    (bytes[i] & (((1 << 4) - 1) << 4)) >> 4);
+		*(offset++) = single_hex(bytes[i] & ((1 << 4) - 1));
+	}
+	*offset = '\0';
+}
+
+
+static int any_to_dec(const char* const str, int base) {
 	char buffer[BUFSIZE];
 	int digit = 0;
 	to_lower(buffer, str);
@@ -164,7 +178,7 @@ static int bishop_move(const char* const hex,
 		}
 		block[1] = *c++;
 
-		int bits = to_dec(block, 16);
+		int bits = any_to_dec(block, 16);
 
 		for(int i = 0; i < 4; i++) {
 			move(pnt, bits & 0b11);
@@ -212,7 +226,8 @@ static void remove_end_whitespace(char* buffer) {
 }
 
 
-static int read_file(const char* file_path, char* buffer) {
+static size_t read_file(const char* file_path,
+                        char* buffer) {
 	FILE* file = NULL;
 	if(strcmp(file_path, "-") == 0)
 		file = stdin;
@@ -225,8 +240,7 @@ static int read_file(const char* file_path, char* buffer) {
 			/* nothing */;
 		*(--offset) = '\0';
 		fclose(file);
-		remove_end_whitespace(buffer);
-		return 0;
+		return (size_t)(offset - buffer);
 	} else {
 		fputs(file_path, stderr);
 		fputs(": no such file\n", stderr);
@@ -243,7 +257,7 @@ int main(int argc, char* argv[]) {
 	int is_version = 0; // 打印版本信息
 	int is_quiet = 0;   // quiet 模式
 	int is_story = 0;   // 打印 Peter 的故事
-	char* type_str = NULL; // 输入的类型, 以字符串表示
+	char* type_str = "hex"; // 输入的类型, 以字符串表示
 	enum InputType type = HEX; // 输入的类型
 	const char* file_path = NULL;
 
@@ -371,10 +385,16 @@ int main(int argc, char* argv[]) {
 	}
 
 	char buffer[BUFSIZE];
+	char bytes[BUFSIZE];
+	size_t size;
 	if(file_path != NULL) {
-		if(!read_file(file_path, buffer)) {
-			if(type == HEX)
+		if((size = read_file(file_path, buffer)) != -1) {
+			if(type == HEX) {
 				remove_end_whitespace(buffer);
+			} else if(type == BYTES) {
+				memcpy(bytes, buffer, size * sizeof(char));
+				bytes_to_hex(bytes, size, buffer);
+			}
 			hex_str = buffer;
 		} else {
 			return 1;
@@ -386,5 +406,4 @@ int main(int argc, char* argv[]) {
 
 	return print_fingerprint(hex_str);
 }
-// TODO: 处理输入的字节流
 // TODO: 修改文档: 版本, 帮助信息, README
