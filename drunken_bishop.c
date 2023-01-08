@@ -1,6 +1,7 @@
 #include <memory.h>
 #include <malloc.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #define max(x, y)          ((x) > (y) ? (x) : (y))
 #define min(x, y)          ((x) < (y) ? (x) : (y))
@@ -177,6 +178,20 @@ ERROR:
 }
 
 
+/**
+ * \brief 删除文件尾部连续的空行与空字符
+ */
+static void remove_end_whitespace(char* buffer) {
+	char* offset = buffer;
+	while(offset != buffer) {
+		if(isspace(*(--offset)))
+			*offset = '\0';
+		else
+			break;
+	}
+}
+
+
 static int read_file(const char* file_path, char* buffer) {
 	FILE* file = NULL;
 	if(strcmp(file_path, "-") == 0)
@@ -189,15 +204,8 @@ static int read_file(const char* file_path, char* buffer) {
 		while((*offset++ = fgetc(file)) != EOF)
 			/* nothing */;
 		*(--offset) = '\0';
-
-		while(offset != buffer) {
-			if(*(--offset) == '\n')
-				*offset = '\0';
-			else
-				break;
-		} // 删除文件尾部连续的空行
-
 		fclose(file);
+		remove_end_whitespace(buffer);
 		return 0;
 	} else {
 		fputs(file_path, stderr);
@@ -252,8 +260,6 @@ int main(int argc, char* argv[]) {
 			} else if(strcmp(arg, "in") == 0) {
 				opt_is_value = 1;
 				file_path = argv[++i];
-				// 当 i == argc - 1 时 argv[++i] 不报错
-				// 奇怪的行为, 但符合预期
 			} else {
 				fputs("unrecognized flag `--", stderr);
 				fputs(arg, stderr);
