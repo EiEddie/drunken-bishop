@@ -14,7 +14,7 @@
 
 #define BUFSIZE 1024 * 1024 // 1MB
 
-#define VERSION "1.0.0"
+#define VERSION "1.1.0"
 #define STORY                                               \
 	"Bishop Peter finds himself in the middle of an\n"      \
 	"ambient atrium. There are walls on all four sides\n"   \
@@ -364,13 +364,16 @@ int main(int argc, char* argv[]) {
 	if(is_help) {
 		fputs(
 		    "The hash fingerprint visualization algorithm, like OpenSSH.\n"
-		    "Usage: bishop [OPTION] [hex]\n"
+		    "Usage: bishop [OPTION] [data]\n"
 		    "\n"
-		    "  -h, --help       print help info\n"
-		    "      --version    print version info\n"
-		    "  -q, --quiet      don't echo hex input\n"
-		    "  -i, --in <file>  use file, if '-' use stdin\n"
-		    "      --story      read the story of Bishop Peter\n",
+		    "  -h, --help         print help info\n"
+		    "      --version      print version info\n"
+		    "  -q, --quiet        don't echo hex input\n"
+		    "  -i, --in <file>    use file, if '-' use stdin\n"
+		    "      --story        read the story of Bishop Peter\n"
+		    "  -t, --type <type>  specify the input type of data or file\n"
+		    "                       hex   - HEX string (default)\n"
+		    "                       bytes - bytes steam\n",
 		    stdout);
 		return 0;
 	}
@@ -406,4 +409,3 @@ int main(int argc, char* argv[]) {
 
 	return print_fingerprint(hex_str);
 }
-// TODO: 修改文档: 版本, 帮助信息, README
