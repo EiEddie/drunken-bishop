@@ -239,10 +239,11 @@ int main(int argc, char* argv[]) {
 	const char* hex_str =
 	    "fc94b0c1e5b0987c5843997697ee9fb7";
 
-	int is_help = 0;           // 打印帮助信息
-	int is_version = 0;        // 打印版本信息
-	int is_quiet = 0;          // quiet 模式
-	int is_story = 0;          // 打印 Peter 的故事
+	int is_help = 0;    // 打印帮助信息
+	int is_version = 0; // 打印版本信息
+	int is_quiet = 0;   // quiet 模式
+	int is_story = 0;   // 打印 Peter 的故事
+	char* type_str = NULL; // 输入的类型, 以字符串表示
 	enum InputType type = HEX; // 输入的类型
 	const char* file_path = NULL;
 
@@ -283,7 +284,7 @@ int main(int argc, char* argv[]) {
 				file_path = argv[++i];
 			} else if(strcmp(arg, "type") == 0) {
 				opt_is_value = 1;
-				type = get_input_type(argv[++i]);
+				type_str = argv[++i];
 			} else {
 				fputs("unrecognized flag `--", stderr);
 				fputs(arg, stderr);
@@ -319,7 +320,7 @@ int main(int argc, char* argv[]) {
 				break;
 			case 't':
 				opt_is_value = 1;
-				type = get_input_type(argv[++i]);
+				type_str = argv[++i];
 				break;
 			default:
 				fputs("unrecognized flag `-", stderr);
@@ -363,6 +364,7 @@ int main(int argc, char* argv[]) {
 		fputs(STORY, stdout);
 		return 0;
 	}
+	type = get_input_type(type_str);
 	if(type == -1) {
 		fputs("unknown input type\n", stderr);
 		return 1;
