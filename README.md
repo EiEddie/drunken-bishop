@@ -30,7 +30,7 @@ Usage: bishop [OPTION] [data]
       --story        read the story of Bishop Peter
   -t, --type <type>  specify the input type of data or file
                        hex   - HEX string (default)
-                       bytes - bytes steam
+                       bytes - bytes stream
 ```
 
 ## 例子
