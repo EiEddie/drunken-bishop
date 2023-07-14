@@ -373,7 +373,7 @@ int main(int argc, char* argv[]) {
 		    "      --story        read the story of Bishop Peter\n"
 		    "  -t, --type <type>  specify the input type of data or file\n"
 		    "                       hex   - HEX string (default)\n"
-		    "                       bytes - bytes steam\n",
+		    "                       bytes - bytes stream\n",
 		    stdout);
 		return 0;
 	}
